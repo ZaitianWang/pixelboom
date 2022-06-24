@@ -9,15 +9,20 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.preference.PreferenceActivity;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -29,9 +34,28 @@ import androidx.core.content.ContextCompat;
 
 import com.example.pixelboom.databinding.ActivityMainBinding;
 
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+import com.squareup.picasso.Picasso;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import cz.msebera.android.httpclient.Header;
+
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
+
+    private final String url = "https://api.deepai.org/api/torch-srgan";
+    private final String key = "b439aaca-965f-4372-b29d-4192684ee7eb";
 
     @SuppressLint("ResourceAsColor")
     @Override
@@ -52,9 +76,15 @@ public class MainActivity extends AppCompatActivity {
                 if ((ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
                         .WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
                 || (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
-                        .READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED))
+                        .READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                || (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
+                        .INTERNET) != PackageManager.PERMISSION_GRANTED))
                 {
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]
+                            {Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                                    Manifest.permission.INTERNET}
+                            , 1);
                 } else {
                     //执行启动相册的方法
                     openAlbum();
@@ -96,11 +126,8 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 2) {
             //判断安卓版本
-            if (resultCode == RESULT_OK && data != null) {
-                if (Build.VERSION.SDK_INT >= 19)
-                    handImage(data);
-                else handImageLow(data);
-            }
+            if (resultCode == RESULT_OK && data != null)
+                handImage(data);
         }
     }
 
@@ -127,15 +154,73 @@ public class MainActivity extends AppCompatActivity {
         }
         //展示图片
         //displayImage(path);
-        doUpscale(path);
+
+        uploadImage(path);
     }
 
-    //安卓小于4.4的处理方法
-    private void handImageLow(Intent data) {
-        Uri uri = data.getData();
-        String path = getImagePath(uri, null);
-        //displayImage(path);
-        doUpscale(path);
+    private void uploadImage(String path) {
+        final ImageItem item = new ImageItem();
+        RequestParams params = new RequestParams();
+        File uploadImage = new File(path);
+        try {
+            params.put("image", uploadImage);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.addHeader("api-key", key);
+        client.setConnectTimeout(5000);
+        client.post(url, params, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    parseItem(item, response);
+                    Toast.makeText(MainActivity.this, "Success!", Toast.LENGTH_SHORT).show();
+                } catch (IOException | JSONException ignored) {
+                    Toast.makeText(MainActivity.this, "Bad luck!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject response) {
+                if (statusCode == 401) {
+                    Toast.makeText(MainActivity.this, "Invalid api-key!", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(MainActivity.this, "Doom!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void saveToGallery(ImageView imageView){
+        BitmapDrawable bitmapDrawable = (BitmapDrawable) imageView.getDrawable();
+        Bitmap bitmap = bitmapDrawable.getBitmap();
+
+        FileOutputStream outputStream = null;
+        File file = Environment.getExternalStorageDirectory();
+        File dir = new File(file.getAbsolutePath() + "/Boom");
+        dir.mkdir();
+
+        String filename = String.format("%d.png",System.currentTimeMillis());
+        File outFile = new File(dir,filename);
+        try {
+            outputStream = new FileOutputStream(outFile);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void parseItem(ImageItem item, JSONObject jsonBody) throws IOException, JSONException {
+        try {
+            item.setUrl(jsonBody.getString("output_url"));
+        } catch (JSONException ignored) {}
+
+        Picasso.get().load(item.getUrl()).placeholder(null).into(binding.imageView);
+
     }
 
     private String getImagePath(Uri uri, String selection) {
@@ -155,17 +240,6 @@ public class MainActivity extends AppCompatActivity {
     private void displayImage(String imagePath) {
         if (imagePath != null) {
             Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-            binding.imageView.setImageBitmap(bitmap);
-        } else {
-            Toast.makeText(this, "Fail to access", Toast.LENGTH_SHORT).show();
-        }
-    }
-    private void doUpscale(String path) {
-        if (path != null) {
-            Bitmap bitmap = BitmapFactory.decodeFile(path);
-            Upscale.run(bitmap, path+"0.png");
-
-            //Image image = new Image()
             binding.imageView.setImageBitmap(bitmap);
         } else {
             Toast.makeText(this, "Fail to access", Toast.LENGTH_SHORT).show();
