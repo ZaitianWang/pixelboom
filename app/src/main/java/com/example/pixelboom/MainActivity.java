@@ -2,6 +2,7 @@ package com.example.pixelboom;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -45,11 +47,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
-
+                //动态申请权限
                 if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
                         .WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 } else {
+                    //执行启动相册的方法
                     openAlbum();
                 }
             }
@@ -66,28 +69,39 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //获取权限的结果
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 1) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 openAlbum();
-            else Toast.makeText(MainActivity.this, "你拒绝了", Toast.LENGTH_SHORT).show();
+            else Toast.makeText(MainActivity.this, "Permission denied", Toast.LENGTH_SHORT).show();
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        handImage(data);
-    }
-
+    //启动相册的方法
     private void openAlbum() {
         Intent intent = new Intent("android.intent.action.GET_CONTENT");
         intent.setType("image/*");
         startActivityForResult(intent, 2);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 2) {
+            //判断安卓版本
+            if (resultCode == RESULT_OK && data != null) {
+                if (Build.VERSION.SDK_INT >= 19)
+                    handImage(data);
+                else handImageLow(data);
+            }
+        }
+    }
+
+    //安卓版本大于4.4的处理方法
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void handImage(Intent data) {
         String path = null;
         Uri uri = data.getData();
@@ -111,12 +125,18 @@ public class MainActivity extends AppCompatActivity {
         displayImage(path);
     }
 
-    //content类型的uri获取图片路径的方法
-    private String getImagePath(Uri uri,String selection) {
+    //安卓小于4.4的处理方法
+    private void handImageLow(Intent data) {
+        Uri uri = data.getData();
+        String path = getImagePath(uri, null);
+        displayImage(path);
+    }
+
+    private String getImagePath(Uri uri, String selection) {
         String path = null;
-        Cursor cursor = getContentResolver().query(uri,null,selection,null,null);
-        if (cursor!=null){
-            if (cursor.moveToFirst()){
+        Cursor cursor = getContentResolver().query(uri, null, selection, null, null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
                 path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
             }
             cursor.close();
@@ -124,15 +144,17 @@ public class MainActivity extends AppCompatActivity {
         return path;
     }
 
+
     //根据路径展示图片的方法
     private void displayImage(String imagePath) {
         if (imagePath != null) {
             Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
             binding.imageView.setImageBitmap(bitmap);
         } else {
-            Toast.makeText(this, "fail to set image", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Fail to access", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
