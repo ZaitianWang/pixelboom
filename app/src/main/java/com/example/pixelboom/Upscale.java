@@ -1,27 +1,38 @@
 package com.example.pixelboom;
 
 import org.bytedeco.opencv.opencv_core.Mat;
+ximport org.opencv.core.Mat;
 import org.bytedeco.opencv.opencv_dnn_superres.DnnSuperResImpl;
+import org.opencv.dnn.*;
+import org.opencv.android.Utils;
 
 import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
+
+import android.graphics.Bitmap;
 
 import java.io.File;
 
 public class Upscale {
     private Upscale(){}
 
-    public static boolean run(String loadPath, String savePath) {
+    public static boolean run(Bitmap bm, String savePath) {
         String[] mode = {"ESPCNx2", "espcn", "2"};
 //        MainApp.write("Started Upscale Process ["+mode[0]+"]", null);
 
         //no savePath option
-        if(savePath == null) {
-            StringBuilder sb = new StringBuilder(loadPath);
-            savePath = sb.insert(sb.lastIndexOf("."),"("+mode[0]+")").toString();
-        }
+//        if(savePath == null) {
+//            StringBuilder sb = new StringBuilder(loadPath);
+//            savePath = sb.insert(sb.lastIndexOf("."),"("+mode[0]+")").toString();
+//        }
 
 //        MainApp.write("Loading Image",null);
-        Mat image = imread(loadPath);
+
+//        Mat mat = new Mat();
+//        Bitmap bmp32 = bmp.copy(Bitmap.Config.ARGB_8888, true);
+//        Utils.bitmapToMat(bmp32, mat);
+
+        Mat image = new Mat();
+        Utils.bitmapToMat(bm, image);
         if (image.empty()) {
 //            MainApp.write("Error Loading Image",MainApp.SCARLET);
             return false;

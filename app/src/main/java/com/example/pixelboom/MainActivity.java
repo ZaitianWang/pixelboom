@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -48,9 +49,12 @@ public class MainActivity extends AppCompatActivity {
 //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
                 //动态申请权限
-                if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
-                        .WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                if ((ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
+                        .WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                || (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
+                        .READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED))
+                {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
                 } else {
                     //执行启动相册的方法
                     openAlbum();
@@ -122,14 +126,16 @@ public class MainActivity extends AppCompatActivity {
             path = uri.getPath();
         }
         //展示图片
-        displayImage(path);
+        //displayImage(path);
+        doUpscale(path);
     }
 
     //安卓小于4.4的处理方法
     private void handImageLow(Intent data) {
         Uri uri = data.getData();
         String path = getImagePath(uri, null);
-        displayImage(path);
+        //displayImage(path);
+        doUpscale(path);
     }
 
     private String getImagePath(Uri uri, String selection) {
@@ -154,7 +160,17 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Fail to access", Toast.LENGTH_SHORT).show();
         }
     }
+    private void doUpscale(String path) {
+        if (path != null) {
+            Bitmap bitmap = BitmapFactory.decodeFile(path);
+            Upscale.run(bitmap, path+"0.png");
 
+            //Image image = new Image()
+            binding.imageView.setImageBitmap(bitmap);
+        } else {
+            Toast.makeText(this, "Fail to access", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
