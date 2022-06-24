@@ -1,8 +1,10 @@
 package com.example.pixelboom;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -29,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
 
+    @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,14 +48,15 @@ public class MainActivity extends AppCompatActivity {
 //                        .setAction("Action", null).show();
 
                 if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
-                        .WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
-                    ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
-                }else{
-                    //执行启动相册的方法
+                        .WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                } else {
                     openAlbum();
                 }
             }
         });
+        // set status bar color
+        getWindow().setStatusBarColor(getResources().getColor(R.color.teal_700));
     }
 
     @Override
@@ -65,10 +69,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void openAlbum(){
+    private void openAlbum() {
         Intent intent = new Intent("android.intent.action.GET_CONTENT");
         intent.setType("image/*");
-        startActivityForResult(intent,2);
+        startActivityForResult(intent, 2);
     }
 
     @Override
