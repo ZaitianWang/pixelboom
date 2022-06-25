@@ -467,7 +467,7 @@ public class MainActivity extends AppCompatActivity {
                 "  @JerryZhangZZY\n" +
                 "  @ZaitianWang\n\n" +
                 "Vist our repo: https://github.com/ZaitianWang/pixelboom";
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_about) {
             AlertDialog alertDialog1 = new AlertDialog.Builder(this)
                     .setTitle("Pixel Boom")
                     .setMessage(about)
