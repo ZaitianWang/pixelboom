@@ -92,12 +92,13 @@ public class MainActivity extends AppCompatActivity {
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         }
 
+        // init buttons' status
         binding.btnUpscale.setEnabled(false);
         binding.btnColorize.setEnabled(false);
         binding.btnSave.setEnabled(false);
         binding.imageView.setEnabled(false);
 
-        binding.fab.setOnClickListener(new View.OnClickListener() {
+        binding.btnAlbum.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // request permission
@@ -256,6 +257,7 @@ public class MainActivity extends AppCompatActivity {
         return path;
     }
 
+    // core function
     private void boom(Bitmap bmp, int mode) {
         final ImageItem item = new ImageItem();
         RequestParams params = new RequestParams();
@@ -272,8 +274,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
+                    // extract image from response packet
                     parseItem(item, response);
-                    // complete success!
+                    // completely success!
                 } catch (IOException | JSONException ignored) {
                     Toast.makeText(MainActivity.this, "Bad luck!", Toast.LENGTH_SHORT).show();
                 }
@@ -282,10 +285,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject response) {
+                // authentication problem
                 if (statusCode == 401) {
-                    Toast.makeText(MainActivity.this, "Invalid api-key!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Invalid api-key!\nPlease contact us on GitHub.", Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(MainActivity.this, "Doom!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Connection failure!", Toast.LENGTH_SHORT).show();
                 }
                 enableButtons();
             }
@@ -293,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public Bitmap imageViewToBmp(ImageView imageView) {
-        // if LayDrawable
+        // handling LayDrawable
         if (imageView.getDrawable() instanceof LayerDrawable) {
             LayerDrawable ld = (LayerDrawable) imageView.getDrawable();
             int width = ld.getIntrinsicWidth();
@@ -303,7 +307,7 @@ public class MainActivity extends AppCompatActivity {
             ld.draw(new Canvas(bmp));
             return bmp;
         }
-        // if BitmapDrawable
+        // handling BitmapDrawable
         else {
             BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
             return drawable.getBitmap();
@@ -334,14 +338,14 @@ public class MainActivity extends AppCompatActivity {
         binding.btnUpscale.setEnabled(false);
         binding.btnColorize.setEnabled(false);
         binding.btnSave.setEnabled(false);
-        binding.fab.setEnabled(false);
+        binding.btnAlbum.setEnabled(false);
     }
 
     private void enableButtons() {
         binding.btnUpscale.setEnabled(true);
         binding.btnColorize.setEnabled(true);
         binding.btnSave.setEnabled(true);
-        binding.fab.setEnabled(true);
+        binding.btnAlbum.setEnabled(true);
     }
 
     private void saveToGallery(Bitmap bmp) {
@@ -357,7 +361,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         // gallery update request
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ContentValues values = new ContentValues();
@@ -438,7 +441,6 @@ public class MainActivity extends AppCompatActivity {
         return path;
     }
 
-
     // display original image
     private void displayOriginalImage(String imagePath) {
         if (imagePath != null) {
@@ -487,7 +489,6 @@ public class MainActivity extends AppCompatActivity {
             alertDialog1.show();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 }
