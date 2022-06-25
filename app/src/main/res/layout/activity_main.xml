@@ -92,6 +92,6 @@
         android:contentDescription="@string/select_an_image_from_the_album"
         app:backgroundTint="@color/status_bar"
         app:srcCompat="@android:drawable/ic_menu_gallery"
-        tools:ignore="ImageContrastCheck" />
+        tools:ignore="ImageContrastCheck,TouchTargetSizeCheck" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

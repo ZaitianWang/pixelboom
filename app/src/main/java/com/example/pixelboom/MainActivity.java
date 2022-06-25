@@ -124,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
                     // set current bitmap;
                     currentBmp = imageViewToBmp(binding.imageView);
                     boom(currentBmp, 0);
+                    enableButtons();
                 }
             }
         });
@@ -138,6 +139,7 @@ public class MainActivity extends AppCompatActivity {
                     // set current bitmap;
                     currentBmp = imageViewToBmp(binding.imageView);
                     boom(currentBmp, 1);
+                    enableButtons();
                 }
             }
         });
@@ -241,7 +243,6 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IOException | JSONException ignored) {
                     Toast.makeText(MainActivity.this, "Bad luck!", Toast.LENGTH_SHORT).show();
                 }
-                enableButtons();
             }
 
             @Override
