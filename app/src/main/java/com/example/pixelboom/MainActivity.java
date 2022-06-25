@@ -2,6 +2,7 @@ package com.example.pixelboom;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -459,9 +460,20 @@ public class MainActivity extends AppCompatActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
+        String about = "Pixel Boom is designed for image superresolution " +
+                "and colorizatin.\n\n" +
+                "  Development Team:\n" +
+                "  @JerryZhangZZY\n" +
+                "  @ZaitianWang\n\n" +
+                "Vist our repo: https://github.com/ZaitianWang/pixelboom";
         if (id == R.id.action_settings) {
+            AlertDialog alertDialog1 = new AlertDialog.Builder(this)
+                    .setTitle("Pixel Boom")
+                    .setMessage(about)
+                    .setIcon(R.mipmap.ic_launcher)
+                    .create();
+            alertDialog1.show();
             return true;
         }
 
