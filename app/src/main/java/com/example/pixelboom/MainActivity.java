@@ -8,7 +8,9 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -38,20 +40,26 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
-    private String currentPath = null;
+    // mode0: upscale; mode1: colorization
     private final String[] url = {"https://api.deepai.org/api/torch-srgan",
                                   "https://api.deepai.org/api/colorizer"};
     private final String key = "b439aaca-965f-4372-b29d-4192684ee7eb";
+
+    private Bitmap originBmp = null;
+    private Bitmap currentBmp = null;
 
     @SuppressLint("ResourceAsColor")
     @Override
@@ -66,9 +74,7 @@ public class MainActivity extends AppCompatActivity {
         binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-                //动态申请权限
+                // request permission
                 if ((ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
                         .WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
                 || (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
@@ -82,11 +88,21 @@ public class MainActivity extends AppCompatActivity {
                                     Manifest.permission.INTERNET}
                             , 1);
                 } else {
-                    //执行启动相册的方法
                     openAlbum();
                 }
             }
         });
+
+        binding.btnColorize.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (currentBmp == null)
+                    Toast.makeText(MainActivity.this, "Please select a photo first", Toast.LENGTH_SHORT).show();
+                else
+                    boom(currentBmp, 1);
+            }
+        });
+
         // set status bar color
         getWindow().setStatusBarColor(getResources().getColor(R.color.status_bar));
         // set status bar foreground
@@ -99,7 +115,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //获取权限的结果
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -110,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //启动相册的方法
     private void openAlbum() {
         Intent intent = new Intent("android.intent.action.GET_CONTENT");
         intent.setType("image/*");
@@ -124,8 +138,10 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 2) {
             // if return a image
             if (resultCode == RESULT_OK && data != null) {
-                currentPath = getActualPath(data);
-                displayImage(currentPath);
+                // display image
+                displayOriginalImage(getActualPath(data));
+                // clear background
+                binding.imageView.setBackground(null);
             }
         }
     }
@@ -151,16 +167,13 @@ public class MainActivity extends AppCompatActivity {
         } else if ("file".equalsIgnoreCase(uri.getScheme())) {
             path = uri.getPath();
         }
-        //展示图片
-        //displayImage(path);
-
         return path;
     }
 
-    private void boom(String path, int mode) {
+    private void boom(Bitmap bmp, int mode) {
         final ImageItem item = new ImageItem();
         RequestParams params = new RequestParams();
-        File uploadImage = new File(path);
+        File uploadImage = bmpToFile(bmp);
         try {
             params.put("image", uploadImage);
         } catch (FileNotFoundException e) {
@@ -174,7 +187,9 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
                     parseItem(item, response);
-                    Toast.makeText(MainActivity.this, "Success!", Toast.LENGTH_SHORT).show();
+                    // set current bitmap;
+                    currentBmp = imageViewToBmp(binding.imageView);
+                    // complete success!
                 } catch (IOException | JSONException ignored) {
                     Toast.makeText(MainActivity.this, "Bad luck!", Toast.LENGTH_SHORT).show();
                 }
@@ -191,6 +206,36 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public Bitmap imageViewToBmp(ImageView imageView) {
+        LayerDrawable ld = (LayerDrawable) imageView.getDrawable();
+        int width = ld.getIntrinsicWidth();
+        int height = ld.getIntrinsicHeight();
+        Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        ld.setBounds(0, 0, width, height);
+        ld.draw(new Canvas(bmp));
+        return bmp;
+    }
+
+    public File bmpToFile(Bitmap bmp) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+        File file = new File(Environment.getExternalStorageDirectory() + "/temp.jpg");
+        try {
+            file.createNewFile();
+            FileOutputStream fos = new FileOutputStream(file);
+            InputStream is = new ByteArrayInputStream(baos.toByteArray());
+            int x = 0;
+            byte[] b = new byte[1024 * 100];
+            while ((x = is.read(b)) != -1) {
+                fos.write(b, 0, x);
+            }
+            fos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return file;
+    }
+
     private void saveToGallery(ImageView imageView){
         BitmapDrawable bitmapDrawable = (BitmapDrawable) imageView.getDrawable();
         Bitmap bitmap = bitmapDrawable.getBitmap();
@@ -200,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
         File dir = new File(file.getAbsolutePath() + "/Boom");
         dir.mkdir();
 
-        String filename = String.format("%d.png",System.currentTimeMillis());
+        String filename = String.format("%d.png", System.currentTimeMillis());
         File outFile = new File(dir,filename);
         try {
             outputStream = new FileOutputStream(outFile);
@@ -216,11 +261,10 @@ public class MainActivity extends AppCompatActivity {
         try {
             item.setUrl(jsonBody.getString("output_url"));
         } catch (JSONException ignored) {}
-
-        Picasso.get().load(item.getUrl()).placeholder(null).into(binding.imageView);
-
+        Picasso.get().load(item.getUrl()).placeholder(R.drawable.progress_animation).into(binding.imageView);
     }
 
+    @SuppressLint("Range")
     private String getImagePath(Uri uri, String selection) {
         String path = null;
         Cursor cursor = getContentResolver().query(uri, null, selection, null, null);
@@ -234,11 +278,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //根据路径展示图片的方法
-    private void displayImage(String imagePath) {
+    // display original image
+    private void displayOriginalImage(String imagePath) {
         if (imagePath != null) {
-            Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-            binding.imageView.setImageBitmap(bitmap);
+            originBmp = currentBmp = BitmapFactory.decodeFile(imagePath);
+            binding.imageView.setImageBitmap(originBmp);
         } else {
             Toast.makeText(this, "Fail to access", Toast.LENGTH_SHORT).show();
         }
