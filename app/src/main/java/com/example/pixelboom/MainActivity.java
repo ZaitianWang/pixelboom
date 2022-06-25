@@ -23,6 +23,7 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
@@ -92,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
         binding.btnUpscale.setEnabled(false);
         binding.btnColorize.setEnabled(false);
         binding.btnSave.setEnabled(false);
+//        binding.imageView.setEnabled(false);
 
         binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -134,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     disableButtons();
                     // set current bitmap;
-                    currentBmp = imageViewToBmp(binding.imageView);
+                    originBmp = imageViewToBmp(binding.imageView);
                     boom(currentBmp, 0);
                 }
             }
@@ -149,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
                     disableButtons();
                     // set current bitmap;
                     currentBmp = imageViewToBmp(binding.imageView);
+                    //originBmp = imageViewToBmp(binding.imageView);
                     boom(currentBmp, 1);
                 }
             }
@@ -166,6 +169,48 @@ public class MainActivity extends AppCompatActivity {
                     saveToGallery(currentBmp);
                     Toast.makeText(MainActivity.this, "Saved", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+//        binding.imageView.setOnLongClickListener(new View.OnLongClickListener() {
+//            @Override
+//            public void Click(View v) {
+//                if (ImageViewStatus == 1) {
+//                    currentBmp = imageViewToBmp(binding.imageView);
+//                    binding.imageView.setImageBitmap(originBmp);
+//                    ImageViewStatus = 0;
+//                }
+//                else {
+//                    binding.imageView.setImageBitmap(currentBmp);
+//                    ImageViewStatus = 1;
+//                }
+//                return true;
+//            }
+//        });
+
+        binding.imageView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                switch (motionEvent.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        //按住事件发生后执行代码的区域
+                        currentBmp = imageViewToBmp(binding.imageView);
+                        binding.imageView.setImageBitmap(originBmp);
+                        break;
+                    }
+                    case MotionEvent.ACTION_MOVE: {
+                        //移动事件发生后执行代码的区域
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP: {
+                        //松开事件发生后执行代码的区域
+                        binding.imageView.setImageBitmap(currentBmp);
+                        break;
+                    }
+                    default:
+                        break;
+                }
+                return true;
             }
         });
     }
