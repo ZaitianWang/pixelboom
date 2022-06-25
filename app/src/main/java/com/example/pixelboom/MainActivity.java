@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         }
 
-        // init buttons' status
+        // init buttons and view status
         binding.btnUpscale.setEnabled(false);
         binding.btnColorize.setEnabled(false);
         binding.btnSave.setEnabled(false);
@@ -175,17 +175,14 @@ public class MainActivity extends AppCompatActivity {
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 switch (motionEvent.getAction()) {
                     case MotionEvent.ACTION_DOWN: {
-                        //按住事件发生后执行代码的区域
                         currentBmp = imageViewToBmp(binding.imageView);
                         binding.imageView.setImageBitmap(originBmp);
                         break;
                     }
                     case MotionEvent.ACTION_MOVE: {
-                        //移动事件发生后执行代码的区域
                         break;
                     }
                     case MotionEvent.ACTION_UP: {
-                        //松开事件发生后执行代码的区域
                         binding.imageView.setImageBitmap(currentBmp);
                         break;
                     }
@@ -238,7 +235,6 @@ public class MainActivity extends AppCompatActivity {
     private String getActualPath(Intent data) {
         String path = null;
         Uri uri = data.getData();
-        //根据不同的uri进行不同的解析
         if (DocumentsContract.isDocumentUri(this, uri)) {
             String docId = DocumentsContract.getDocumentId(uri);
             if ("com.android.providers.media.documents".equals(uri.getAuthority())) {
