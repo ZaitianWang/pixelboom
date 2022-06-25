@@ -32,7 +32,7 @@
             android:layout_width="370dp"
             android:layout_height="370dp"
             android:adjustViewBounds="true"
-            android:background="@color/status_bar"
+            android:background="@color/disabled"
             android:contentDescription="@string/diaplay_the_image"
             android:scaleType="fitEnd"
             app:layout_constraintBottom_toTopOf="@+id/btnUpscale"

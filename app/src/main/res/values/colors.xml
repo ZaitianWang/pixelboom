@@ -10,4 +10,5 @@
     <color name="background">#E69310</color>
     <color name='status_bar'>#FFFFBB33</color>
     <color name='button_font'>#694D15</color>
+    <color name='disabled'>#CA810E</color>
 </resources>

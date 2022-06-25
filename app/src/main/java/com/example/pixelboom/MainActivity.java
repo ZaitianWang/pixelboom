@@ -2,7 +2,9 @@ package com.example.pixelboom;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -11,15 +13,18 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -43,10 +48,12 @@ import org.json.JSONObject;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -55,9 +62,10 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     // mode0: upscale; mode1: colorization
     private final String[] url = {"https://api.deepai.org/api/torch-srgan",
-                                  "https://api.deepai.org/api/colorizer"};
+            "https://api.deepai.org/api/colorizer"};
     private final String key = "b439aaca-965f-4372-b29d-4192684ee7eb";
 
+    private String originPath;
     private Bitmap originBmp = null;
     private Bitmap currentBmp = null;
 
@@ -68,40 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         setSupportActionBar(binding.toolbar);
-
-        binding.fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // request permission
-                if ((ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
-                        .WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-                || (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
-                        .READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-                || (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
-                        .INTERNET) != PackageManager.PERMISSION_GRANTED))
-                {
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]
-                            {Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                                    Manifest.permission.INTERNET}
-                            , 1);
-                } else {
-                    openAlbum();
-                }
-            }
-        });
-
-        binding.btnColorize.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (currentBmp == null)
-                    Toast.makeText(MainActivity.this, "Please select a photo first", Toast.LENGTH_SHORT).show();
-                else
-                    boom(currentBmp, 1);
-            }
-        });
 
         // set status bar color
         getWindow().setStatusBarColor(getResources().getColor(R.color.status_bar));
@@ -113,6 +88,76 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         }
+
+        binding.btnUpscale.setEnabled(false);
+        binding.btnColorize.setEnabled(false);
+        binding.btnSave.setEnabled(false);
+
+        binding.fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // request permission
+                if ((ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
+                        .WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                        || (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
+                        .READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                        || (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
+                        .INTERNET) != PackageManager.PERMISSION_GRANTED)) {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]
+                                    {Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                                            Manifest.permission.INTERNET}
+                            , 1);
+                } else {
+                    openAlbum();
+                }
+            }
+        });
+
+        binding.btnUpscale.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (currentBmp == null)
+                    Toast.makeText(MainActivity.this, "Please select a photo first", Toast.LENGTH_SHORT).show();
+                else {
+                    disableButtons();
+                    // set current bitmap;
+                    currentBmp = imageViewToBmp(binding.imageView);
+                    boom(currentBmp, 0);
+                }
+            }
+        });
+
+        binding.btnColorize.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (currentBmp == null)
+                    Toast.makeText(MainActivity.this, "Please select a photo first", Toast.LENGTH_SHORT).show();
+                else {
+                    disableButtons();
+                    // set current bitmap;
+                    currentBmp = imageViewToBmp(binding.imageView);
+                    boom(currentBmp, 1);
+                }
+            }
+        });
+
+        binding.btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (currentBmp == null)
+                    Toast.makeText(MainActivity.this, "Please select a photo first", Toast.LENGTH_SHORT).show();
+                else {
+                    disableButtons();
+                    // set current bitmap;
+                    currentBmp = imageViewToBmp(binding.imageView);
+                    // save to drive
+                    saveToGallery(currentBmp);
+                    Toast.makeText(MainActivity.this, "Saved", Toast.LENGTH_SHORT).show();
+                    enableButtons();
+                }
+            }
+        });
     }
 
     @Override
@@ -138,10 +183,15 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 2) {
             // if return a image
             if (resultCode == RESULT_OK && data != null) {
+                // save path of original image
+                originPath = getActualPath(data);
                 // display image
-                displayOriginalImage(getActualPath(data));
+                displayOriginalImage(originPath);
                 // clear background
                 binding.imageView.setBackground(null);
+                binding.btnUpscale.setEnabled(true);
+                binding.btnColorize.setEnabled(true);
+                binding.btnSave.setEnabled(true);
             }
         }
     }
@@ -187,19 +237,18 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
                     parseItem(item, response);
-                    // set current bitmap;
-                    currentBmp = imageViewToBmp(binding.imageView);
                     // complete success!
                 } catch (IOException | JSONException ignored) {
                     Toast.makeText(MainActivity.this, "Bad luck!", Toast.LENGTH_SHORT).show();
                 }
+                enableButtons();
             }
+
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject response) {
                 if (statusCode == 401) {
                     Toast.makeText(MainActivity.this, "Invalid api-key!", Toast.LENGTH_SHORT).show();
-                }
-                else {
+                } else {
                     Toast.makeText(MainActivity.this, "Doom!", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -207,13 +256,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public Bitmap imageViewToBmp(ImageView imageView) {
-        LayerDrawable ld = (LayerDrawable) imageView.getDrawable();
-        int width = ld.getIntrinsicWidth();
-        int height = ld.getIntrinsicHeight();
-        Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        ld.setBounds(0, 0, width, height);
-        ld.draw(new Canvas(bmp));
-        return bmp;
+        // if LayDrawable
+        if (imageView.getDrawable() instanceof LayerDrawable) {
+            LayerDrawable ld = (LayerDrawable) imageView.getDrawable();
+            int width = ld.getIntrinsicWidth();
+            int height = ld.getIntrinsicHeight();
+            Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            ld.setBounds(0, 0, width, height);
+            ld.draw(new Canvas(bmp));
+            return bmp;
+        }
+        // if BitmapDrawable
+        else {
+            BitmapDrawable drawable = (BitmapDrawable) imageView.getDrawable();
+            return drawable.getBitmap();
+        }
     }
 
     public File bmpToFile(Bitmap bmp) {
@@ -236,31 +293,96 @@ public class MainActivity extends AppCompatActivity {
         return file;
     }
 
-    private void saveToGallery(ImageView imageView){
-        BitmapDrawable bitmapDrawable = (BitmapDrawable) imageView.getDrawable();
-        Bitmap bitmap = bitmapDrawable.getBitmap();
+    private void disableButtons() {
+        binding.btnUpscale.setEnabled(false);
+        binding.btnColorize.setEnabled(false);
+        binding.btnSave.setEnabled(false);
+    }
 
+    private void enableButtons() {
+        binding.btnUpscale.setEnabled(true);
+        binding.btnColorize.setEnabled(true);
+        binding.btnSave.setEnabled(true);
+    }
+
+    private void saveToGallery(Bitmap bmp) {
+        int index = originPath.lastIndexOf('.');
+        String savePath = originPath.substring(0, index) + "_boom_" + System.currentTimeMillis() + ".jpg";
         FileOutputStream outputStream = null;
-        File file = Environment.getExternalStorageDirectory();
-        File dir = new File(file.getAbsolutePath() + "/Boom");
-        dir.mkdir();
-
-        String filename = String.format("%d.png", System.currentTimeMillis());
-        File outFile = new File(dir,filename);
+        File output = new File(savePath);
         try {
-            outputStream = new FileOutputStream(outFile);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream = new FileOutputStream(output);
+            bmp.compress(Bitmap.CompressFormat.JPEG, 75, outputStream);
             outputStream.flush();
             outputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        // gallery update request
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.MediaColumns.DISPLAY_NAME, output.getName());
+            values.put(MediaStore.MediaColumns.MIME_TYPE, getMimeType(output));
+            values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DCIM);
+            ContentResolver contentResolver = getContentResolver();
+            Uri uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            if (uri == null) {
+                return;
+            }
+            try {
+                outputStream = (FileOutputStream) contentResolver.openOutputStream(uri);
+                FileInputStream fileInputStream = new FileInputStream(output);
+                FileUtils.copy(fileInputStream, outputStream);
+                fileInputStream.close();
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            MediaScannerConnection.scanFile(
+                    getApplicationContext(),
+                    new String[]{output.getAbsolutePath()},
+                    new String[]{"image/jpeg"},
+                    (path, uri) -> {
+                        // Scan Completed
+                    });
+        }
+    }
+
+    public String getMimeType(File file) {
+        String suffix = getSuffix(file);
+        if (suffix == null) {
+            return "file/*";
+        }
+        String type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
+        if (type != null || !type.isEmpty()) {
+            return type;
+        }
+        return "file/*";
+    }
+
+    private static String getSuffix(File file) {
+        if (file == null || !file.exists() || file.isDirectory()) {
+            return null;
+        }
+        String fileName = file.getName();
+        if (fileName.equals("") || fileName.endsWith(".")) {
+            return null;
+        }
+        int index = fileName.lastIndexOf(".");
+        if (index != -1) {
+            return fileName.substring(index + 1).toLowerCase(Locale.US);
+        } else {
+            return null;
         }
     }
 
     private void parseItem(ImageItem item, JSONObject jsonBody) throws IOException, JSONException {
         try {
             item.setUrl(jsonBody.getString("output_url"));
-        } catch (JSONException ignored) {}
+        } catch (JSONException ignored) {
+        }
         Picasso.get().load(item.getUrl()).placeholder(R.drawable.progress_animation).into(binding.imageView);
     }
 
