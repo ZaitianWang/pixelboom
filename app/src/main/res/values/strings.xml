@@ -9,4 +9,10 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="upscale">upscale</string>
+    <string name="select_an_image_from_the_album">select an image from the album</string>
+    <string name="diaplay_the_image">diaplay the image</string>
+    <string name="colorize">colorize</string>
+    <string name="button">Button</string>
+    <string name="save">save</string>
 </resources>

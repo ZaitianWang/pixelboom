@@ -7,22 +7,23 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/Theme.Pixelboom.AppBarOverlay">
+        android:layout_height="wrap_content">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/status_bar"
-            app:popupTheme="@style/Theme.Pixelboom.PopupOverlay" />
+            app:title="PIXELBOOM"
+            app:titleTextAppearance="@style/TextAppearance.AppCompat.Large"
+            app:titleTextColor="@color/button_font" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="814dp"
+        android:layout_height="790dp"
         android:layout_gravity="bottom"
         android:background="@color/background">
 
@@ -30,20 +31,67 @@
             android:id="@+id/imageView"
             android:layout_width="370dp"
             android:layout_height="370dp"
-            android:layout_marginTop="92dp"
+            android:adjustViewBounds="true"
+            android:background="@color/status_bar"
+            android:contentDescription="@string/diaplay_the_image"
+            android:scaleType="fitEnd"
+            app:layout_constraintBottom_toTopOf="@+id/btnUpscale"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.36"
+            tools:ignore="ImageContrastCheck"
             tools:srcCompat="@tools:sample/avatars" />
+
+        <Button
+            android:id="@+id/btnUpscale"
+            android:layout_width="370dp"
+            android:layout_height="60dp"
+            android:layout_marginBottom="5dp"
+            android:text="@string/upscale"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textColor="@color/button_font"
+            app:layout_constraintBottom_toTopOf="@+id/btnColorize"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:ignore="TextContrastCheck" />
+
+        <Button
+            android:id="@+id/btnColorize"
+            android:layout_width="370dp"
+            android:layout_height="60dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/colorize"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textColor="@color/button_font"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:ignore="TextContrastCheck" />
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/save"
+            android:textColor="@color/button_font"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageView"
+            tools:ignore="TextContrastCheck" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="25dp"
+        android:layout_gravity="bottom|right"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="160dp"
+        android:contentDescription="@string/select_an_image_from_the_album"
         app:backgroundTint="@color/status_bar"
-        app:srcCompat="@android:drawable/ic_menu_gallery" />
+        app:srcCompat="@android:drawable/ic_menu_gallery"
+        tools:ignore="ImageContrastCheck" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

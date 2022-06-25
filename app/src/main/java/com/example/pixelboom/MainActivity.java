@@ -2,7 +2,6 @@ package com.example.pixelboom;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,15 +9,12 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceActivity;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,7 +39,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -53,8 +48,9 @@ import cz.msebera.android.httpclient.Header;
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
-
-    private final String url = "https://api.deepai.org/api/torch-srgan";
+    private String currentPath = null;
+    private final String[] url = {"https://api.deepai.org/api/torch-srgan",
+                                  "https://api.deepai.org/api/colorizer"};
     private final String key = "b439aaca-965f-4372-b29d-4192684ee7eb";
 
     @SuppressLint("ResourceAsColor")
@@ -124,16 +120,19 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        // album opened
         if (requestCode == 2) {
-            //判断安卓版本
-            if (resultCode == RESULT_OK && data != null)
-                handImage(data);
+            // if return a image
+            if (resultCode == RESULT_OK && data != null) {
+                currentPath = getActualPath(data);
+                displayImage(currentPath);
+            }
         }
     }
 
-    //安卓版本大于4.4的处理方法
+    // > 4.4
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private void handImage(Intent data) {
+    private String getActualPath(Intent data) {
         String path = null;
         Uri uri = data.getData();
         //根据不同的uri进行不同的解析
@@ -155,10 +154,10 @@ public class MainActivity extends AppCompatActivity {
         //展示图片
         //displayImage(path);
 
-        uploadImage(path);
+        return path;
     }
 
-    private void uploadImage(String path) {
+    private void boom(String path, int mode) {
         final ImageItem item = new ImageItem();
         RequestParams params = new RequestParams();
         File uploadImage = new File(path);
@@ -170,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
         AsyncHttpClient client = new AsyncHttpClient();
         client.addHeader("api-key", key);
         client.setConnectTimeout(5000);
-        client.post(url, params, new JsonHttpResponseHandler() {
+        client.post(url[mode], params, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
@@ -180,7 +179,6 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Bad luck!", Toast.LENGTH_SHORT).show();
                 }
             }
-
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject response) {
                 if (statusCode == 401) {
