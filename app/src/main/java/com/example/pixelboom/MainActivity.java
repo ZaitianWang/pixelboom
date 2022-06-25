@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -466,12 +467,20 @@ public class MainActivity extends AppCompatActivity {
                 "  Development Team:\n" +
                 "  @JerryZhangZZY\n" +
                 "  @ZaitianWang\n\n" +
-                "Vist our repo: https://github.com/ZaitianWang/pixelboom";
+                "Click the button to visit our repo: https://github.com/ZaitianWang/pixelboom";
         if (id == R.id.action_about) {
             AlertDialog alertDialog1 = new AlertDialog.Builder(this)
                     .setTitle("Pixel Boom")
                     .setMessage(about)
                     .setIcon(R.mipmap.ic_launcher)
+                    .setPositiveButton("Go to GitHub", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Uri uri = Uri.parse("https://github.com/ZaitianWang/pixelboom");
+                            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                            startActivity(intent);
+                        }
+                    })
                     .create();
             alertDialog1.show();
             return true;
