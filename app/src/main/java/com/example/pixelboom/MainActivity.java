@@ -97,19 +97,31 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // request permission
-                if ((ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
-                        .WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-                        || (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
-                        .READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-                        || (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission
-                        .INTERNET) != PackageManager.PERMISSION_GRANTED)) {
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]
-                                    {Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                            Manifest.permission.READ_EXTERNAL_STORAGE,
-                                            Manifest.permission.INTERNET}
-                            , 1);
+                // >= Android 11
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    if ((ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                            || (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                            || (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED)
+                            || (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.MANAGE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
+                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.INTERNET,
+                                Manifest.permission.MANAGE_EXTERNAL_STORAGE}, 1);
+                    }
+                    else
+                        openAlbum();
                 } else {
-                    openAlbum();
+                    if ((ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                            || (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                            || (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED)) {
+                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.INTERNET}, 1);
+                    }
+                    else
+                        openAlbum();
                 }
             }
         });
@@ -198,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // > 4.4
+    // > Android 4.4
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private String getActualPath(Intent data) {
         String path = null;
