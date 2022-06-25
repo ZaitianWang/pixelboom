@@ -17,7 +17,7 @@ Pixel Boom is a Java-based Android software, featuring image super-resolution an
 
 ## Environment Requirement
 
-Support by Android>4.4.
+Minimum Android version: 7.0 (API Level 24)
 
 ## Development Team
 
