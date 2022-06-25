@@ -137,6 +137,8 @@ public class MainActivity extends AppCompatActivity {
                 if (currentBmp == null)
                     Toast.makeText(MainActivity.this, "Please select a photo first", Toast.LENGTH_SHORT).show();
                 else {
+                    // set current bitmap;
+                    currentBmp = imageViewToBmp(binding.imageView);
                     disableButtons();
                     boom(currentBmp, 0);
                 }
@@ -149,6 +151,8 @@ public class MainActivity extends AppCompatActivity {
                 if (currentBmp == null)
                     Toast.makeText(MainActivity.this, "Please select a photo first", Toast.LENGTH_SHORT).show();
                 else {
+                    // set current bitmap;
+                    currentBmp = imageViewToBmp(binding.imageView);
                     disableButtons();
                     boom(currentBmp, 1);
                 }
