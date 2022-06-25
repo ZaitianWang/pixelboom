@@ -334,12 +334,14 @@ public class MainActivity extends AppCompatActivity {
         binding.btnUpscale.setEnabled(false);
         binding.btnColorize.setEnabled(false);
         binding.btnSave.setEnabled(false);
+        binding.fab.setEnabled(false);
     }
 
     private void enableButtons() {
         binding.btnUpscale.setEnabled(true);
         binding.btnColorize.setEnabled(true);
         binding.btnSave.setEnabled(true);
+        binding.fab.setEnabled(true);
     }
 
     private void saveToGallery(Bitmap bmp) {
