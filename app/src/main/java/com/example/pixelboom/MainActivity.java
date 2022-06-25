@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap originBmp = null;
     private Bitmap currentBmp = null;
 
-    @SuppressLint("ResourceAsColor")
+    @SuppressLint({"ResourceAsColor", "ClickableViewAccessibility"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

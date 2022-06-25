@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/status_bar"
-            app:title="PIXELBOOM"
+            app:title="Pixel Boom"
             app:titleTextAppearance="@style/TextAppearance.AppCompat.Large"
             app:titleTextColor="@color/button_font" />
 
@@ -23,7 +23,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="790dp"
+        android:layout_height="match_parent"
         android:layout_gravity="bottom"
         android:background="@color/background">
 
@@ -31,15 +31,15 @@
             android:id="@+id/imageView"
             android:layout_width="370dp"
             android:layout_height="370dp"
+            android:layout_marginBottom="140dp"
             android:adjustViewBounds="true"
             android:background="@color/disabled"
-            android:contentDescription="@string/diaplay_the_image"
-            android:scaleType="fitEnd"
+            android:contentDescription="@string/display_the_image"
+            android:scaleType="fitCenter"
             app:layout_constraintBottom_toTopOf="@+id/btnUpscale"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.36"
             tools:ignore="ImageContrastCheck"
             tools:srcCompat="@tools:sample/avatars" />
 
