@@ -167,22 +167,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        binding.imageView.setOnLongClickListener(new View.OnLongClickListener() {
-//            @Override
-//            public void Click(View v) {
-//                if (ImageViewStatus == 1) {
-//                    currentBmp = imageViewToBmp(binding.imageView);
-//                    binding.imageView.setImageBitmap(originBmp);
-//                    ImageViewStatus = 0;
-//                }
-//                else {
-//                    binding.imageView.setImageBitmap(currentBmp);
-//                    ImageViewStatus = 1;
-//                }
-//                return true;
-//            }
-//        });
-
         binding.imageView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
