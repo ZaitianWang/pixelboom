@@ -464,10 +464,11 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         String about = "Pixel Boom is designed for image superresolution " +
                 "and colorization.\n\n" +
-                "  Development Team:\n" +
+                "Development Team:\n" +
                 "  @JerryZhangZZY\n" +
-                "  @ZaitianWang\n\n" +
-                "Click the button to visit our repo: https://github.com/ZaitianWang/pixelboom";
+                "  @ZaitianWang\n" +
+                "GitHub Repo: pixelboom\n\n"+
+                "Powered by DeepAI API.";
         if (id == R.id.action_about) {
             AlertDialog alertDialog1 = new AlertDialog.Builder(this)
                     .setTitle("Pixel Boom")
@@ -477,6 +478,14 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             Uri uri = Uri.parse("https://github.com/ZaitianWang/pixelboom");
+                            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                            startActivity(intent);
+                        }
+                    })
+                    .setNeutralButton("Go to DeepAI", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Uri uri = Uri.parse("https://deepai.org/apis");
                             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                             startActivity(intent);
                         }
