@@ -136,7 +136,6 @@ public class MainActivity extends AppCompatActivity {
                     // set current bitmap;
                     currentBmp = imageViewToBmp(binding.imageView);
                     boom(currentBmp, 0);
-                    enableButtons();
                 }
             }
         });
@@ -151,7 +150,6 @@ public class MainActivity extends AppCompatActivity {
                     // set current bitmap;
                     currentBmp = imageViewToBmp(binding.imageView);
                     boom(currentBmp, 1);
-                    enableButtons();
                 }
             }
         });
@@ -162,13 +160,11 @@ public class MainActivity extends AppCompatActivity {
                 if (currentBmp == null)
                     Toast.makeText(MainActivity.this, "Please select a photo first", Toast.LENGTH_SHORT).show();
                 else {
-                    disableButtons();
                     // set current bitmap;
                     currentBmp = imageViewToBmp(binding.imageView);
                     // save to drive
                     saveToGallery(currentBmp);
                     Toast.makeText(MainActivity.this, "Saved", Toast.LENGTH_SHORT).show();
-                    enableButtons();
                 }
             }
         });
@@ -255,6 +251,7 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IOException | JSONException ignored) {
                     Toast.makeText(MainActivity.this, "Bad luck!", Toast.LENGTH_SHORT).show();
                 }
+                enableButtons();
             }
 
             @Override
@@ -264,6 +261,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(MainActivity.this, "Doom!", Toast.LENGTH_SHORT).show();
                 }
+                enableButtons();
             }
         });
     }
