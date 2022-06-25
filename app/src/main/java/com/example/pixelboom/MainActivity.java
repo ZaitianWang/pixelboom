@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         binding.btnUpscale.setEnabled(false);
         binding.btnColorize.setEnabled(false);
         binding.btnSave.setEnabled(false);
-//        binding.imageView.setEnabled(false);
+        binding.imageView.setEnabled(false);
 
         binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -439,6 +439,7 @@ public class MainActivity extends AppCompatActivity {
     private void displayOriginalImage(String imagePath) {
         if (imagePath != null) {
             originBmp = currentBmp = BitmapFactory.decodeFile(imagePath);
+            binding.imageView.setEnabled(true);
             binding.imageView.setImageBitmap(originBmp);
         } else {
             Toast.makeText(this, "Fail to access", Toast.LENGTH_SHORT).show();
