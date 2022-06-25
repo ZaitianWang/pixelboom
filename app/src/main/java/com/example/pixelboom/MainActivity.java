@@ -289,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
     public File bmpToFile(Bitmap bmp) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bmp.compress(Bitmap.CompressFormat.JPEG, 50, baos);
-        File file = new File(Environment.getExternalStorageDirectory() + "/temp.jpg");
+        File file = new File(getApplicationContext().getFilesDir().getAbsolutePath() + "/temp.jpg");
         try {
             file.createNewFile();
             FileOutputStream fos = new FileOutputStream(file);
