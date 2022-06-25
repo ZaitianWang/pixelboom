@@ -463,7 +463,7 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         String about = "Pixel Boom is designed for image superresolution " +
-                "and colorizatin.\n\n" +
+                "and colorization.\n\n" +
                 "  Development Team:\n" +
                 "  @JerryZhangZZY\n" +
                 "  @ZaitianWang\n\n" +
