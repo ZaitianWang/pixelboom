@@ -287,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IOException | JSONException ignored) {
                     Toast.makeText(MainActivity.this, "Bad luck!", Toast.LENGTH_SHORT).show();
                 }
-                enableButtons();
+                enableButtons(true);
             }
 
             @Override
@@ -296,9 +296,9 @@ public class MainActivity extends AppCompatActivity {
                 if (statusCode == 401) {
                     Toast.makeText(MainActivity.this, "Invalid api-key!\nPlease contact us on GitHub.", Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(MainActivity.this, "Connection failure!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Connection failure!(" + statusCode + ")", Toast.LENGTH_SHORT).show();
                 }
-                enableButtons();
+                enableButtons(false);
             }
         });
     }
@@ -366,23 +366,28 @@ public class MainActivity extends AppCompatActivity {
         binding.btnAlbum.hide();
     }
 
-    private void enableButtons() {
-        binding.tvHint.setText(R.string.hint_download);
-        AlphaAnimation alp = new AlphaAnimation(1.0f, 0.0f);
-        alp.setStartOffset(2000);
-        alp.setDuration(500);
-        binding.tvHint.setAnimation(alp);
-        alp.setAnimationListener(new Animation.AnimationListener() {
-            public void onAnimationStart(Animation animation) {
-            }
+    private void enableButtons(boolean success) {
+        if (success) {
+            binding.tvHint.setText(R.string.hint_download);
+            AlphaAnimation alp = new AlphaAnimation(1.0f, 0.0f);
+            alp.setStartOffset(2000);
+            alp.setDuration(500);
+            binding.tvHint.setAnimation(alp);
+            alp.setAnimationListener(new Animation.AnimationListener() {
+                public void onAnimationStart(Animation animation) {
+                }
 
-            public void onAnimationRepeat(Animation animation) {
-            }
+                public void onAnimationRepeat(Animation animation) {
+                }
 
-            public void onAnimationEnd(Animation animation) {
-                binding.tvHint.setVisibility(View.INVISIBLE);
-            }
-        });
+                public void onAnimationEnd(Animation animation) {
+                    binding.tvHint.setVisibility(View.INVISIBLE);
+                }
+            });
+        }
+        else {
+            binding.tvHint.setVisibility(View.INVISIBLE);
+        }
         binding.btnUpscale.setEnabled(true);
         binding.btnColorize.setEnabled(true);
         binding.btnSave.setEnabled(true);
