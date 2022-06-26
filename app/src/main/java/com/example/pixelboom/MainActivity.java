@@ -9,10 +9,12 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.media.MediaScannerConnection;
@@ -96,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
         binding.btnUpscale.setEnabled(false);
         binding.btnColorize.setEnabled(false);
         binding.btnSave.setEnabled(false);
+        binding.btnSave.hide();
         binding.imageView.setEnabled(false);
 
         binding.btnAlbum.setOnClickListener(new View.OnClickListener() {
@@ -227,9 +230,8 @@ public class MainActivity extends AppCompatActivity {
                 displayOriginalImage(originPath);
                 // clear background
                 binding.imageView.setBackground(null);
-                binding.btnUpscale.setEnabled(true);
-                binding.btnColorize.setEnabled(true);
-                binding.btnSave.setEnabled(true);
+                // enable buttons
+                enableButtons();
             }
         }
     }
@@ -338,14 +340,18 @@ public class MainActivity extends AppCompatActivity {
         binding.btnUpscale.setEnabled(false);
         binding.btnColorize.setEnabled(false);
         binding.btnSave.setEnabled(false);
+        binding.btnSave.hide();
         binding.btnAlbum.setEnabled(false);
+        binding.btnAlbum.hide();
     }
 
     private void enableButtons() {
         binding.btnUpscale.setEnabled(true);
         binding.btnColorize.setEnabled(true);
         binding.btnSave.setEnabled(true);
+        binding.btnSave.show();
         binding.btnAlbum.setEnabled(true);
+        binding.btnAlbum.show();
     }
 
     private void saveToGallery(Bitmap bmp) {

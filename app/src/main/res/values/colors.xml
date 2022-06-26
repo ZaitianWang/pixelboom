@@ -11,4 +11,6 @@
     <color name='status_bar'>#FFFFBB33</color>
     <color name='button_font'>#694D15</color>
     <color name='disabled'>#CA810E</color>
+    <color name='black_yellow'>#472E05</color>
+    <color name='white_yellow'>#F9DBA9</color>
 </resources>

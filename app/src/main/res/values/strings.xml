@@ -15,4 +15,5 @@
     <string name="colorize">colorize</string>
     <string name="button">Button</string>
     <string name="save">save</string>
+    <string name="save_to_album" />
 </resources>

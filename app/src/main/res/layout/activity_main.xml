@@ -31,14 +31,13 @@
             android:id="@+id/imageView"
             android:layout_width="370dp"
             android:layout_height="370dp"
-            android:layout_marginBottom="140dp"
+            android:layout_marginBottom="300dp"
             android:adjustViewBounds="true"
             android:background="@color/disabled"
             android:contentDescription="@string/display_the_image"
             android:scaleType="fitCenter"
-            app:layout_constraintBottom_toTopOf="@+id/btnUpscale"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             tools:ignore="ImageContrastCheck"
             tools:srcCompat="@tools:sample/avatars" />
@@ -69,17 +68,6 @@
             app:layout_constraintStart_toStartOf="parent"
             tools:ignore="TextContrastCheck" />
 
-        <Button
-            android:id="@+id/btnSave"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/save"
-            android:textColor="@color/button_font"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView"
-            tools:ignore="TextContrastCheck" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -88,10 +76,24 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
         android:layout_marginEnd="20dp"
-        android:layout_marginBottom="160dp"
+        android:layout_marginBottom="230dp"
         android:contentDescription="@string/select_an_image_from_the_album"
-        app:backgroundTint="@color/status_bar"
+        app:backgroundTint="@color/black_yellow"
         app:srcCompat="@android:drawable/ic_menu_gallery"
-        tools:ignore="ImageContrastCheck,TouchTargetSizeCheck" />
+        app:tint="@color/white_yellow"
+        tools:ignore="ImageContrastCheck,RtlHardcoded,TouchTargetSizeCheck" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_marginEnd="85dp"
+        android:layout_marginBottom="230dp"
+        android:contentDescription="@string/save_to_album"
+        app:backgroundTint="@color/black_yellow"
+        app:srcCompat="@android:drawable/ic_menu_save"
+        app:tint="@color/white_yellow"
+        tools:ignore="ImageContrastCheck,RtlHardcoded,TouchTargetSizeCheck,SpeakableTextPresentCheck" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
