@@ -29,6 +29,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -231,7 +233,9 @@ public class MainActivity extends AppCompatActivity {
                 // clear background
                 binding.imageView.setBackground(null);
                 // enable buttons
-                enableButtons();
+                binding.btnColorize.setEnabled(true);
+                binding.btnUpscale.setEnabled(true);
+                binding.btnSave.setEnabled(true);
             }
         }
     }
@@ -337,6 +341,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void disableButtons() {
+        binding.tvHint.setText(R.string.hint_upload);
+        AlphaAnimation alp = new AlphaAnimation(0.0f, 1.0f);
+        alp.setDuration(500);
+        binding.tvHint.setAnimation(alp);
+        alp.setAnimationListener(new Animation.AnimationListener() {
+            public void onAnimationStart(Animation animation) {
+                binding.tvHint.setVisibility(View.INVISIBLE);
+            }
+
+            public void onAnimationRepeat(Animation animation) {
+            }
+
+            public void onAnimationEnd(Animation animation) {
+                binding.tvHint.setVisibility(View.VISIBLE);
+            }
+        });
         binding.btnUpscale.setEnabled(false);
         binding.btnColorize.setEnabled(false);
         binding.btnSave.setEnabled(false);
@@ -346,6 +366,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void enableButtons() {
+        binding.tvHint.setText(R.string.hint_download);
+        AlphaAnimation alp = new AlphaAnimation(1.0f, 0.0f);
+        alp.setStartOffset(2000);
+        alp.setDuration(500);
+        binding.tvHint.setAnimation(alp);
+        alp.setAnimationListener(new Animation.AnimationListener() {
+            public void onAnimationStart(Animation animation) {
+            }
+
+            public void onAnimationRepeat(Animation animation) {
+            }
+
+            public void onAnimationEnd(Animation animation) {
+                binding.tvHint.setVisibility(View.INVISIBLE);
+            }
+        });
         binding.btnUpscale.setEnabled(true);
         binding.btnColorize.setEnabled(true);
         binding.btnSave.setEnabled(true);
