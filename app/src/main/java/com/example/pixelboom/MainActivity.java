@@ -235,7 +235,8 @@ public class MainActivity extends AppCompatActivity {
                 // enable buttons
                 binding.btnColorize.setEnabled(true);
                 binding.btnUpscale.setEnabled(true);
-                binding.btnSave.setEnabled(true);
+                binding.btnSave.setEnabled(false);
+                binding.btnSave.hide();
             }
         }
     }
