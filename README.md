@@ -1,5 +1,8 @@
 # Pixel Boom
 
+![version](https://img.shields.io/github/v/release/ZaitianWang/PixelBoom?include_prereleases)
+![downloads](https://img.shields.io/github/downloads/ZaitianWang/PixelBoom/total)
+
 Pixel Boom is a Java-based Android app, featuring image super-resolution and colorization.
 
  ![icon](images/icon.png)
